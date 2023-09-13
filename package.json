@@ -1,7 +1,7 @@
 {
-  "name": "eu.netherlands3d.{NAME:kebab-case}",
-  "version": "{VERSION}",
-  "displayName": "Netherlands3D - {DISPLAY_NAME}",
+  "name": "eu.netherlands3d.mutations",
+  "version": "1.0.0",
+  "displayName": "Netherlands3D - Mutations",
   "description": "{DESCRIPTION}",
   "unity": "2022.2",
   "documentationUrl": "https://netherlands3d.eu/docs",
@@ -15,5 +15,6 @@
     "url": "https://www.netherlands3d.eu"
   },
   "dependencies": {
+    "eu.netherlands3d.coordinates": "1.1.0"
   }
 }

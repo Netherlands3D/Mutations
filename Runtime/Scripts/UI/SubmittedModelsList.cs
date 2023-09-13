@@ -1,5 +1,4 @@
 using Netherlands3D;
-using Netherlands3D.Interface;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,104 +10,111 @@ using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-public class SubmittedModelsList : MonoBehaviour
+namespace Netherlands3D.Mutations
 {
-    [HideInInspector] public string code = "";
-
-    [SerializeField] private ConfigurationFile config;
-    [SerializeField] private UnityEvent<string> selectModel;
-    [SerializeField] private UnityEvent<string> deselectModel;
-    [SerializeField] private GameObject template;
-
-    private List<GameObject> items = new List<GameObject>();
-
-    [Serializable]
-    public class ApprovalStages
+    public class SubmittedModelsList : MonoBehaviour
     {
-        public string[] submitted;
-        public string[] approved;
-        public string[] denied;
-    }
+        [HideInInspector] public string code = "";
 
-    private void Awake()
-    {
-        template.gameObject.SetActive(false);
-    }
+        [Header("URL's")]
+        [SerializeField] private string submittedModelsURL = "https://...";
+        [SerializeField] private string downloadSubmittedModelURL = "https://...";
 
-    public void GetListWithCode(string code)
-    {
-        this.code = code;
-        this.gameObject.SetActive(true);
+        [Header("Events")]
+        [SerializeField] private UnityEvent<string> selectModel;
+        [SerializeField] private UnityEvent<string> deselectModel;
+        [SerializeField] private GameObject template;
 
-        Refresh();
-    }
+        private List<GameObject> items = new List<GameObject>();
 
-    private void Clear()
-    {
-        for (int i = items.Count - 1; i >= 0; i--)
+        [Serializable]
+        public class ApprovalStages
         {
-            var item = items[i];
-            Destroy(item);
-            items.RemoveAt(i);
+            public string[] submitted;
+            public string[] approved;
+            public string[] denied;
         }
-    }
 
-    public void Refresh()
-    {
-        Clear();
-        StartCoroutine(LoadList());
-    }
-
-    private void DrawLists(ApprovalStages approvalStagesLists)
-    {
-        foreach(var item in approvalStagesLists.submitted)
+        private void Awake()
         {
-            var newListItem = Instantiate(template,template.transform.parent);
-            var submittedModel = newListItem.GetComponent<SubmittedModel>();
-            submittedModel.modelPath = item;
-            submittedModel.GetComponentInChildren<TMP_Text>().text = Path.GetFileName(item);
-            submittedModel.parentList = this;
-
-            newListItem.SetActive(true);
-
-            items.Add(newListItem);
+            template.gameObject.SetActive(false);
         }
-    }
 
-    private IEnumerator LoadList()
-    {
-        var listUrl = $"{config.submittedModelsURL}?code={code}";
-        Debug.Log($"Getting list from: {listUrl}");
-        using UnityWebRequest webRequest = UnityWebRequest.Get(listUrl);
-
-        yield return webRequest.SendWebRequest();
-
-        if (webRequest.result != UnityWebRequest.Result.Success)
+        public void GetListWithCode(string code)
         {
-            Debug.LogWarning(webRequest.error);
+            this.code = code;
+            this.gameObject.SetActive(true);
+
+            Refresh();
         }
-        else
+
+        private void Clear()
         {
-            var json = webRequest.downloadHandler.text;
-
-            var approvalStagesLists = JsonUtility.FromJson<ApprovalStages>(json);
-            DrawLists(approvalStagesLists);
+            for (int i = items.Count - 1; i >= 0; i--)
+            {
+                var item = items[i];
+                Destroy(item);
+                items.RemoveAt(i);
+            }
         }
-    }
 
-    public void LoadModel(BaseEventData modelBullet)
-    {
-        var isOn = modelBullet.selectedObject.GetComponent<Toggle>().isOn;
-        var submittedModel = modelBullet.selectedObject.GetComponent<SubmittedModel>();
-        Debug.Log(submittedModel.modelPath);
-
-        if (isOn)
+        public void Refresh()
         {
-            //Toggle on atm? This click will disable/ unload model
-            deselectModel.Invoke(submittedModel.modelPath);
+            Clear();
+            StartCoroutine(LoadList());
         }
-        else{
-            selectModel.Invoke(config.downloadSubmittedModel.Replace("{modelpath}", submittedModel.modelPath) + $"?code={code}");
+
+        private void DrawLists(ApprovalStages approvalStagesLists)
+        {
+            foreach(var item in approvalStagesLists.submitted)
+            {
+                var newListItem = Instantiate(template,template.transform.parent);
+                var submittedModel = newListItem.GetComponent<SubmittedModel>();
+                submittedModel.modelPath = item;
+                submittedModel.GetComponentInChildren<TMP_Text>().text = Path.GetFileName(item);
+                submittedModel.parentList = this;
+
+                newListItem.SetActive(true);
+
+                items.Add(newListItem);
+            }
+        }
+
+        private IEnumerator LoadList()
+        {
+            var listUrl = $"{submittedModelsURL}?code={code}";
+            Debug.Log($"Getting list from: {listUrl}");
+            using UnityWebRequest webRequest = UnityWebRequest.Get(listUrl);
+
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogWarning(webRequest.error);
+            }
+            else
+            {
+                var json = webRequest.downloadHandler.text;
+
+                var approvalStagesLists = JsonUtility.FromJson<ApprovalStages>(json);
+                DrawLists(approvalStagesLists);
+            }
+        }
+
+        public void LoadModel(BaseEventData modelBullet)
+        {
+            var isOn = modelBullet.selectedObject.GetComponent<Toggle>().isOn;
+            var submittedModel = modelBullet.selectedObject.GetComponent<SubmittedModel>();
+            Debug.Log(submittedModel.modelPath);
+
+            if (isOn)
+            {
+                //Toggle on atm? This click will disable/ unload model
+                deselectModel.Invoke(submittedModel.modelPath);
+            }
+            else{
+                selectModel.Invoke(downloadSubmittedModelURL.Replace("{modelpath}", submittedModel.modelPath) + $"?code={code}");
+            }
         }
     }
 }

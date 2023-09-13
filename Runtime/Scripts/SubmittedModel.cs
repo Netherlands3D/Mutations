@@ -4,46 +4,49 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class SubmittedModel : MonoBehaviour
+namespace Netherlands3D.Mutations
 {
-    public string modelPath = "";
-    public GameObject linkedModel;
-
-    [SerializeField] private ConfigurationFile config;
-
-    public SubmittedModelsList parentList;
-
-    public void Approve()
+    public class SubmittedModel : MonoBehaviour
     {
-        StartCoroutine(ChangeStage("approved"));
-    }
+        public string modelPath = "";
+        public GameObject linkedModel;
 
-    public void Deny()
-    {
-        StartCoroutine(ChangeStage("denied"));
-    }
+        [SerializeField] private string changeModelStageURL = "https://...";
 
-    private IEnumerator ChangeStage(string targetStage)
-    {
-        var changeUrl = config.changeModelStageURL.
-            Replace("{modelpath}", modelPath.Replace("/changerequests/", "")).
-            Replace("{newstage}", targetStage) 
-            + $"?code={parentList.code}";
+        public SubmittedModelsList parentList;
 
-        Debug.Log($"Moving {modelPath} to {targetStage} using {changeUrl}");
-
-        using UnityWebRequest webRequest = UnityWebRequest.Get(changeUrl);
-        yield return webRequest.SendWebRequest();
-
-        if (webRequest.result != UnityWebRequest.Result.Success)
+        public void Approve()
         {
-            Debug.LogWarning($"Could not move {modelPath} to {targetStage}");
-            Debug.LogWarning(webRequest.error);
+            StartCoroutine(ChangeStage("approved"));
         }
-        else
+
+        public void Deny()
         {
-            Debug.Log($"Moved {modelPath} to {targetStage}");
-            gameObject.SetActive(false);
+            StartCoroutine(ChangeStage("denied"));
+        }
+
+        private IEnumerator ChangeStage(string targetStage)
+        {
+            var changeUrl = changeModelStageURL.
+                Replace("{modelpath}", modelPath.Replace("/changerequests/", "")).
+                Replace("{newstage}", targetStage)
+                + $"?code={parentList.code}";
+
+            Debug.Log($"Moving {modelPath} to {targetStage} using {changeUrl}");
+
+            using UnityWebRequest webRequest = UnityWebRequest.Get(changeUrl);
+            yield return webRequest.SendWebRequest();
+
+            if (webRequest.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogWarning($"Could not move {modelPath} to {targetStage}");
+                Debug.LogWarning(webRequest.error);
+            }
+            else
+            {
+                Debug.Log($"Moved {modelPath} to {targetStage}");
+                gameObject.SetActive(false);
+            }
         }
     }
 }
