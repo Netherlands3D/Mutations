@@ -12,26 +12,26 @@ using UnityEditor;
 
 namespace Netherlands3D.Mutations
 {
-    public class CityJSONDownloader : MonoBehaviour
+    public class CityJSONStreamWriter : MonoBehaviour
     {
 #if UNITY_WEBGL
-    //FileUpload.jslib methods
-    [DllImport("__Internal")]
-    private static extern void DownloadFromIndexedDB(string filePath, string callbackObject, string callbackMethod);
+        //FileUpload.jslib methods
+        [DllImport("__Internal")]
+        private static extern void DownloadFromIndexedDB(string filePath, string callbackObject, string callbackMethod);
 
-    [DllImport("__Internal")]
-    private static extern void SyncFilesFromIndexedDB(string callbackObject, string callbackMethod);
+        [DllImport("__Internal")]
+        private static extern void SyncFilesFromIndexedDB(string callbackObject, string callbackMethod);
 
-    [DllImport("__Internal")]
-    private static extern void SyncFilesToIndexedDB(string callbackObject, string callbackMethod);
+        [DllImport("__Internal")]
+        private static extern void SyncFilesToIndexedDB(string callbackObject, string callbackMethod);
 #endif
 
         private GameObject targetGameObject;
 
         [Header("Progress indiction events")]
         [SerializeField] private UnityEvent<float> progress = new();
-        [SerializeField] private UnityEvent<string> description = new();
-        [SerializeField] private UnityEvent<string> stageDescription = new();
+        [SerializeField] private UnityEvent<string> mainStageDescription = new();
+        [SerializeField] private UnityEvent<string> subStageDescription = new();
 
         private string tempFileName = "";
         private string tempStreamwritePath = "";
@@ -42,12 +42,12 @@ namespace Netherlands3D.Mutations
         /// On WebGL IndexedDB is used to streamwrite to instead of having to build the large .json in memory.
         /// </summary>
         /// <param name="gameObjectWithMesh">The GameObject that contains a MeshFilter with the target Mesh</param>
-        public void DownloadMeshAsCityJSON(GameObject gameObjectWithMesh)
+        public void StreamGameObjectMeshToCityJSON(GameObject gameObjectWithMesh)
         {
             if (gameObjectWithMesh.TryGetComponent(out MeshFilter meshFilter) && meshFilter.sharedMesh)
             {
                 targetGameObject = gameObjectWithMesh;
-                StartCoroutine(DownloadWithProgress(meshFilter.sharedMesh, CoordinateConverter.UnitytoRD(gameObjectWithMesh.transform.position)));
+                StartCoroutine(WriteWithProgress(meshFilter.sharedMesh, CoordinateConverter.UnitytoRD(gameObjectWithMesh.transform.position)));
             }
             else
             {
@@ -55,10 +55,10 @@ namespace Netherlands3D.Mutations
             }
         }
 
-        private IEnumerator DownloadWithProgress(Mesh mesh, Vector3RD rdCoordinate)
+        private IEnumerator WriteWithProgress(Mesh mesh, Vector3RD rdCoordinate)
         {
-            description.Invoke("Downloaden als CityJSON");
-            stageDescription.Invoke("Converteren...");
+            mainStageDescription.Invoke("Downloaden als CityJSON");
+            subStageDescription.Invoke("Converteren...");
             progress.Invoke(0.001f);
             yield return new WaitForEndOfFrame();
 
@@ -91,7 +91,7 @@ namespace Netherlands3D.Mutations
                     if (currentWrite % writesToShowFeedback == 0)
                     {
                         progress.Invoke(currentWrite / totalWrites);
-                        stageDescription.Invoke($"Wegschrijven: {Mathf.Round((currentWrite / totalWrites) * 100)}%");
+                        subStageDescription.Invoke($"Wegschrijven: {Mathf.Round((currentWrite / totalWrites) * 100)}%");
                         yield return null;
                     }
                 }
@@ -116,7 +116,7 @@ namespace Netherlands3D.Mutations
                     if (currentWrite % writesToShowFeedback == 0)
                     {
                         progress.Invoke(currentWrite / totalWrites);
-                        stageDescription.Invoke($"Wegschrijven: {Mathf.Round((currentWrite / totalWrites) * 100)}%");
+                        subStageDescription.Invoke($"Wegschrijven: {Mathf.Round((currentWrite / totalWrites) * 100)}%");
                         yield return null;
                     }
                 }
@@ -138,7 +138,7 @@ namespace Netherlands3D.Mutations
             }
 
             ClearTempFile();
-            stageDescription.Invoke("Gereed");
+            mainStageDescription.Invoke("Gereed");
             progress.Invoke(1.0f);
 #endif
             }
@@ -161,7 +161,7 @@ namespace Netherlands3D.Mutations
         {
             Debug.Log($"Done downloading via IndexedDB {filename}");
             ClearTempFile();
-            stageDescription.Invoke("Gereed");
+            subStageDescription.Invoke("Gereed");
             progress.Invoke(1.0f);
         }
 

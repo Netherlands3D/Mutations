@@ -555,6 +555,8 @@ GameObject:
   - component: {fileID: 3410183914322234984}
   - component: {fileID: 6373838454421111893}
   - component: {fileID: 8419181368092348560}
+  - component: {fileID: 7494875386684144678}
+  - component: {fileID: 5412321825980045504}
   m_Layer: 5
   m_Name: SubmittedModels
   m_TagString: Untagged
@@ -691,11 +693,58 @@ MonoBehaviour:
   downloadSubmittedModelURL: https://...
   selectModel:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 7494875386684144678}
+        m_TargetAssemblyTypeName: Netherlands3D.Mutations.ImportFileFromURL, eu.netherlands3d.mutations.Runtime
+        m_MethodName: Import
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   deselectModel:
     m_PersistentCalls:
       m_Calls: []
   template: {fileID: 1289349564694898682}
+--- !u!114 &7494875386684144678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4074747145419318772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 768a1b79a80866d4696cbd6ea3f40080, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  importProgress:
+    m_PersistentCalls:
+      m_Calls: []
+  filesImportedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &5412321825980045504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4074747145419318772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cb4f8eb1d674714c93757e19fa50260, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 2100000, guid: f45aa8c97c95c7c46b4711df2cb53b4d, type: 2}
+  maxParseSteps: 30000
+  spawnImportedGameObject:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &6315336750776535795
 GameObject:
   m_ObjectHideFlags: 0
