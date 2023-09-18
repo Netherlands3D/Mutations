@@ -17,6 +17,9 @@ namespace Netherlands3D.Mutations
 #if UNITY_WEBGL
         //FileUpload.jslib methods
         [DllImport("__Internal")]
+        private static extern void UploadFromIndexedDB(string filePath, string targetURL, string callbackObject, string callbackMethodSuccess, string callbackMethodFailed);
+        
+        [DllImport("__Internal")]
         private static extern void DownloadFromIndexedDB(string filePath, string callbackObject, string callbackMethod);
 
         [DllImport("__Internal")]
@@ -27,6 +30,10 @@ namespace Netherlands3D.Mutations
 #endif
 
         private GameObject targetGameObject;
+
+        public bool saveLocalFileAfterWriting = false;
+        public bool postToURLAfterWriting = false;
+        [SerializeField] private string postURL = "https://";
 
         [Header("Progress indiction events")]
         [SerializeField] private UnityEvent<float> progress = new();
@@ -145,12 +152,16 @@ namespace Netherlands3D.Mutations
         }
 
         /// <summary>
-        /// Starts download on IndexedDB/JS side after sync.
+        /// After writing to IndexedDB, optional export to file or URL
         /// </summary>
         public void SyncedFromIndexedDB()
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
-        DownloadFromIndexedDB(tempFileName, this.gameObject.name, nameof(DownloadDoneFromIndexedDB));
+            if(saveLocalFileAfterWriting)
+                DownloadFromIndexedDB(tempFileName, this.gameObject.name, nameof(DownloadDoneFromIndexedDB));
+
+            if(postToURLAfterWriting)
+                UploadFromIndexedDB(tempFileName, postURL, this.gameObject.name, nameof(UploadDoneFromIndexedDB),nameof(UploadFailedFromIndexedDB));
 #endif
         }
 
@@ -164,6 +175,26 @@ namespace Netherlands3D.Mutations
             subStageDescription.Invoke("Gereed");
             progress.Invoke(1.0f);
         }
+
+        /// <summary>
+        /// Download method done on IndexedDB/JS side
+        /// </summary>
+        public void UploadDoneFromIndexedDB()
+        {
+            Debug.Log($"Done uploading via IndexedDB");
+            ClearTempFile();
+            subStageDescription.Invoke("Gereed");
+            progress.Invoke(1.0f);
+        }
+
+        public void UploadFailedFromIndexedDB(string filename)
+        {
+            Debug.Log($"Failed uploading via IndexedDB {filename}");
+            ClearTempFile();
+            subStageDescription.Invoke("Gereed");
+            progress.Invoke(1.0f);
+        }
+
 
         /// <summary>
         /// Clean up temporary file
