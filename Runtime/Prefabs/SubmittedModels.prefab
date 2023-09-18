@@ -555,6 +555,7 @@ GameObject:
   - component: {fileID: 3410183914322234984}
   - component: {fileID: 6373838454421111893}
   - component: {fileID: 8419181368092348560}
+  - component: {fileID: 6038035663353518402}
   - component: {fileID: 7494875386684144678}
   - component: {fileID: 5412321825980045504}
   m_Layer: 5
@@ -710,6 +711,31 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   template: {fileID: 1289349564694898682}
+--- !u!114 &6038035663353518402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4074747145419318772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c1943c71e3e68e49adcaf64bea5535b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  saveLocalFileAfterWriting: 0
+  postToURLAfterWriting: 1
+  postURL: https://nl3d-functions.azurewebsites.net/api/SubmitModel/{modelname}
+  progress:
+    m_PersistentCalls:
+      m_Calls: []
+  mainStageDescription:
+    m_PersistentCalls:
+      m_Calls: []
+  subStageDescription:
+    m_PersistentCalls:
+      m_Calls: []
+  writesToShowFeedback: 100
 --- !u!114 &7494875386684144678
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -727,7 +753,19 @@ MonoBehaviour:
       m_Calls: []
   filesImportedEvent:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 5412321825980045504}
+        m_TargetAssemblyTypeName: Netherlands3D.CityJSON.Stream.ImportCityJSON, eu.netherlands3d.mutations.Runtime
+        m_MethodName: LoadCityJSONFromFile
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &5412321825980045504
 MonoBehaviour:
   m_ObjectHideFlags: 0
