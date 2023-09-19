@@ -13,6 +13,8 @@ namespace Netherlands3D.CityJSON.Stream
 {
     public class ImportCityJSON : MonoBehaviour
     {
+        public UnityEvent<float> importProgress;
+
         [SerializeField] private Material material;
         [SerializeField] private int maxParseSteps = 30000;
         [SerializeField] private UnityEvent<GameObject> spawnImportedGameObject;
@@ -27,8 +29,9 @@ namespace Netherlands3D.CityJSON.Stream
         {
             objectName = Path.GetFileName(filepath);
             
-            var isCityJSON = IsCityJSON(filepath);
+            importProgress.Invoke(0.0f);
 
+            var isCityJSON = IsCityJSON(filepath);
             if (isCityJSON)
             {
                 Debug.Log("CityJSON, parsing..");
@@ -101,16 +104,20 @@ namespace Netherlands3D.CityJSON.Stream
 
                         var propertyName = jsonReader.Value.ToString();
                         Debug.Log(propertyName);
+                        
                         if (propertyName == "boundaries")
                         {
+                            importProgress.Invoke(0.3f);
                             yield return ReadBoundaries(jsonReader, triangleIndices);
                         }
                         else if (propertyName == "vertices")
                         {
+                            importProgress.Invoke(0.7f);
                             yield return ReadVertices(jsonReader, vertices);
                         }
                         else if (propertyName == "transform")
                         {
+                            importProgress.Invoke(0.8f);
                             yield return ReadTransformValues(jsonReader);
                         }
                     }
@@ -118,6 +125,8 @@ namespace Netherlands3D.CityJSON.Stream
 
                 //End of file
                 SpawnNewGameObject(triangleIndices, vertices);
+
+                importProgress.Invoke(1.0f);
             }
         }
 
