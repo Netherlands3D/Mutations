@@ -20,12 +20,13 @@ namespace Netherlands3D.Mutations
 #endif
         public void Import(string url)
         {
+            Debug.Log($"Import from URL {url}");
             //Get the filename from the url (without any vars)
             var filename = Path.GetFileName(url).Split("?")[0];
 
 #if UNITY_WEBGL && !UNITY_EDITOR
         //Callbacks for WebGL go through FileInputIndexDB        
-        ImportFromURL(url, filename);
+            ImportFromURL(url, filename);
 #else
             StartCoroutine(DownloadAndImport(url, filename));
 #endif
@@ -39,9 +40,11 @@ namespace Netherlands3D.Mutations
             if (getModelRequest.result == UnityWebRequest.Result.Success)
             {
                 var data = getModelRequest.downloadHandler.data;
-                File.WriteAllBytes($"{Application.persistentDataPath}/{filename}", data);
+                var localFile = $"{Application.persistentDataPath}/{filename}";
+                Debug.Log($"Wrote local file: {localFile}");
+                File.WriteAllBytes(localFile, data);
 
-                filesImportedEvent.Invoke(filename);
+                filesImportedEvent.Invoke(localFile);
             }
             yield return null;
         }
