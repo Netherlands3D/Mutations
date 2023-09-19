@@ -21,8 +21,12 @@ namespace Netherlands3D.CityJSON.Stream
         Vector3 scale = new Vector3();
         Vector3 translate = new Vector3();
 
+        private string objectName = "";
+
         public void LoadCityJSONFromFile(string filepath)
         {
+            objectName = Path.GetFileName(filepath);
+            
             var isCityJSON = IsCityJSON(filepath);
 
             if (isCityJSON)
@@ -131,6 +135,7 @@ namespace Netherlands3D.CityJSON.Stream
             mesh.RecalculateNormals();
 
             var gameObject = new GameObject();
+            gameObject.name = objectName;
             gameObject.AddComponent<MeshFilter>().mesh = mesh;
             gameObject.AddComponent<MeshRenderer>().material = new Material(material);
 
