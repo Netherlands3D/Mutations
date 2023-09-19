@@ -146,7 +146,9 @@ namespace Netherlands3D.CityJSON.Stream
                 translate.y,
                 translate.z
              );*/
-            gameObject.transform.localScale = scale;
+
+             //Apply parsed scale
+            //gameObject.transform.localScale = scale;
 
             spawnImportedGameObject.Invoke(gameObject);
         }
@@ -181,6 +183,7 @@ namespace Netherlands3D.CityJSON.Stream
                 }
             }
 
+            Debug.Log($"Translate: {scale.x},{scale.y},{scale.z}");
             Debug.Log($"Translate: {translate.x},{translate.y},{translate.z}");
             yield return null;
         }
