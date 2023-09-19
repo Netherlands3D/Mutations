@@ -6,6 +6,8 @@ using UnityEngine;
 using System.IO;
 using UnityEngine.Events;
 using Netherlands3D.Coordinates;
+using UnityEngine.Networking;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -34,6 +36,10 @@ namespace Netherlands3D.Mutations
         public bool saveLocalFileAfterWriting = false;
         public bool postToURLAfterWriting = false;
         [SerializeField] private string postURL = "https://";
+        public string PostURLWithCode { 
+            get => postURL.Replace("{modelname}",targetGameObject.name+".json") + "?code=" + code; 
+        }
+        
 
         [Header("Progress indiction events")]
         [SerializeField] private UnityEvent<float> progress = new();
@@ -43,6 +49,12 @@ namespace Netherlands3D.Mutations
         private string tempFileName = "";
         private string tempStreamwritePath = "";
         [SerializeField] private int writesToShowFeedback = 100;
+
+        private string code = "";
+        public void SetCode(string code)
+        {
+            this.code = code;
+        }
 
         /// <summary>
         /// StreamWrite a Mesh using a Coroutine to have a small-as-possible memory footprint and provide user progress feedback on a single thread (WebGL requirement)
@@ -79,7 +91,7 @@ namespace Netherlands3D.Mutations
             if (enoughGeometry)
             {
                 //stream write cityjson lines
-                tempFileName = targetGameObject.name + "_CityJSON.json";
+                tempFileName = targetGameObject.name + ".json";
                 tempStreamwritePath = Application.persistentDataPath + "/" + tempFileName;
                 var streamWriter = new StreamWriter(tempStreamwritePath);
                 streamWriter.Write("{\"type\":\"CityJSON\",\"version\":\"1.0\",\"metadata\":{\"referenceSystem\":\"https://www.opengis.net/def/crs/EPSG/0/7415\"},\"CityObjects\":{\"" + targetGameObject.name + "\":{\"type\":\"Building\",\"geometry\":[{\"type\":\"MultiSurface\",\"lod\":3.3,\"boundaries\":[");
@@ -137,18 +149,46 @@ namespace Netherlands3D.Mutations
             //Make sure file exists in JS side of IndexedDB registry before downloading
             SyncFilesToIndexedDB(this.gameObject.name, nameof(SyncedFromIndexedDB));
 #elif UNITY_EDITOR
-            string selectedPath = EditorUtility.SaveFilePanel("Select File", "", $"{tempFileName}", "json");
-            if (!string.IsNullOrEmpty(selectedPath))
-            {
-                File.Copy(tempStreamwritePath, selectedPath,true);
-                Debug.Log($"{selectedPath} saved.");
+            if(saveLocalFileAfterWriting){
+                string selectedPath = EditorUtility.SaveFilePanel("Select File", "", $"{tempFileName}", "json");
+                if (!string.IsNullOrEmpty(selectedPath))
+                {
+                    File.Copy(tempStreamwritePath, selectedPath,true);
+                    Debug.Log($"{selectedPath} saved.");
+                }
+
+                ClearTempFile();
+                mainStageDescription.Invoke("Gereed");
+                progress.Invoke(1.0f);
             }
 
-            ClearTempFile();
-            mainStageDescription.Invoke("Gereed");
-            progress.Invoke(1.0f);
+            if(postToURLAfterWriting)
+            {
+                StartCoroutine(UploadToURL());
+            }
 #endif
             }
+        }
+
+        private IEnumerator UploadToURL() 
+        {
+            subStageDescription.Invoke("Bezig..");
+            progress.Invoke(0.5f);
+
+            byte[] fileData = File.ReadAllBytes(tempStreamwritePath);
+            UnityWebRequest www = UnityWebRequest.Put(PostURLWithCode, fileData);
+            yield return www.SendWebRequest();
+    
+            if (www.result != UnityWebRequest.Result.Success) {
+                Debug.LogWarning(www.error);
+                Debug.LogWarning(PostURLWithCode);
+            }
+            else {
+                Debug.Log("Upload complete!");
+            }
+
+            subStageDescription.Invoke("Gereed");
+            progress.Invoke(1.0f);
         }
 
         /// <summary>
@@ -161,7 +201,7 @@ namespace Netherlands3D.Mutations
                 DownloadFromIndexedDB(tempFileName, this.gameObject.name, nameof(DownloadDoneFromIndexedDB));
 
             if(postToURLAfterWriting)
-                UploadFromIndexedDB(tempFileName, postURL, this.gameObject.name, nameof(UploadDoneFromIndexedDB),nameof(UploadFailedFromIndexedDB));
+                UploadFromIndexedDB(tempFileName, PostURLWithCode, this.gameObject.name, nameof(UploadDoneFromIndexedDB),nameof(UploadFailedFromIndexedDB));
 #endif
         }
 
