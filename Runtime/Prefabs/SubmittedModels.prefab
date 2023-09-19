@@ -270,7 +270,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   modelPath: 
   linkedModel: {fileID: 0}
-  changeModelStageURL: https://nl3d-functions.azurewebsites.net/api/ChangeModelStage/{stage}/{target}/{newstage}
+  changeModelStageURL: https://nl3d-functions.azurewebsites.net/api/ChangeModelStage/{modelpath}/{newstage}
   parentList: {fileID: 8419181368092348560}
 --- !u!1 &2710101836717891886
 GameObject:
@@ -584,7 +584,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -30, y: -30}
+  m_AnchoredPosition: {x: 100, y: -30}
   m_SizeDelta: {x: 410, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5257957360829158247
@@ -779,6 +779,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cb4f8eb1d674714c93757e19fa50260, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  importProgress:
+    m_PersistentCalls:
+      m_Calls: []
   material: {fileID: 2100000, guid: f45aa8c97c95c7c46b4711df2cb53b4d, type: 2}
   maxParseSteps: 30000
   spawnImportedGameObject:
