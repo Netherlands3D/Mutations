@@ -27,6 +27,8 @@ namespace Netherlands3D.Mutations
 
         private List<GameObject> items = new List<GameObject>();
 
+        private Coroutine runningRefresh;
+
         [Serializable]
         public class ApprovalStages
         {
@@ -61,7 +63,13 @@ namespace Netherlands3D.Mutations
         public void Refresh()
         {
             Clear();
-            StartCoroutine(LoadList());
+
+            if(runningRefresh != null)
+            {
+                StopCoroutine(runningRefresh);
+                runningRefresh = null;
+            }
+            runningRefresh = StartCoroutine(LoadList());
         }
 
         private void DrawLists(ApprovalStages approvalStagesLists)
@@ -99,6 +107,8 @@ namespace Netherlands3D.Mutations
                 var approvalStagesLists = JsonUtility.FromJson<ApprovalStages>(json);
                 DrawLists(approvalStagesLists);
             }
+
+            runningRefresh = null;
         }
 
         public void LoadModel(BaseEventData modelBullet)
